@@ -1,0 +1,52 @@
+.mytheme .v-label-pagetable-text{
+    font-size: 14px!important;
+    color:deepskyblue;
+    align-content: center;
+}
+
+.mytheme .v-button-small-button{
+    font-size: 10px!important;
+    color:deepskyblue;
+    align-content: center;
+    alignment-baseline: center;
+}
+
+
+.mytheme .v-label-pagetableIcon-text{
+    font-size: 10px!important;
+    color:deepskyblue;
+    align-content: center;
+}
+
+
+.mytheme .v-filterselect-small-combo [class*="input"] {
+    padding-right: 0px!important;
+    color:deepskyblue;
+    font-size: 10px!important;
+}
+
+.mytheme .v-filterselect-small-comboIcon [class*="input"] {
+    padding-right: 0px!important;
+    bottom: -1px!important;
+    color:deepskyblue;
+    font-size: 10px!important;
+}
+
+.mytheme .v-filterselect-small-combo [class*="button"] {
+    border-left: 0px solid #e4e4e4!important;
+    right: -3px!important;
+    top: -1px!important;
+    bottom:-1px!important;
+    color:deepskyblue;
+    font-size: 10px!important;
+}
+
+.mytheme .v-filterselect-small-comboIcon [class*="button"] {
+    border-left: 0px solid #e4e4e4!important;
+    right: -3px!important;
+    top: -1px!important;
+    bottom: 0px!important;
+    color:deepskyblue;
+    font-size: 10px!important;
+}
+
