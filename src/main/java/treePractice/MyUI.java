@@ -30,6 +30,7 @@ import treePractice.form.MenuGridForm;
 import treePractice.util.DemoContentLayout;
 import treePractice.util.MenuTreeContentLayout;
 import treePractice.util.PageGrid;
+import treePractice.util.WindowCustom;
 
 import java.awt.*;
 import java.text.SimpleDateFormat;
@@ -49,6 +50,9 @@ public class MyUI extends UI {
     List<MenuTree> menuList = new ArrayList<>();
     List<MenuTree> menuListNoOrder = new ArrayList<>();
     List<MenuTree> allItem = new ArrayList<>();
+    PageGrid<MenuTree> grid = new PageGrid<MenuTree>();
+    //创建菜单树
+    Tree<String> tree = new Tree();
     @Override
     protected void init(VaadinRequest vaadinRequest) {
 
@@ -56,8 +60,7 @@ public class MyUI extends UI {
         final HorizontalLayout hLayout = new HorizontalLayout();
 
 
-        //创建菜单树
-        Tree<String> tree = new Tree();
+
         //设置树宽度
         tree.setWidth("300");
         //设置树的数据集
@@ -71,7 +74,7 @@ public class MyUI extends UI {
         //获取当前树中的所有数据（包含所有后代）
         getAllItem(allItem,menuList);
 
-        PageGrid<MenuTree> grid = new PageGrid<MenuTree>();
+
 
         grid.addColumn(MenuTree::getMenuName).setId("menuName");
         grid.addColumn(MenuTree::getId).setId("id");
@@ -123,9 +126,11 @@ public class MyUI extends UI {
                 menuGridForm.getTextFieldCreateTime().setValue(sdf.format(dt));
                 menuGridForm.getTextFieldCreateTime().setReadOnly(true);
 
-                GridLayout layout = menuGridForm.getGridLayout(menuTree);
-                Window window = new Window("新增",layout);
+//                GridLayout layout = menuGridForm.getGridLayout(menuTree);
+                Window window = new Window("新增",menuGridForm.getGridLayout(menuTree));
+                //是否可拖拽变大变小
                 window.setResizable(false);
+                window.setModal(true);
                 window.center();
                 addWindow(window);
 
@@ -233,9 +238,11 @@ public class MyUI extends UI {
                 menuGridForm.getTextFieldCreateTime().setValue(sdf.format(dt));
                 menuGridForm.getTextFieldCreateTime().setReadOnly(true);
 
-                GridLayout layout = menuGridForm.getGridLayout(menuTree);
-                Window window = new Window("新增下级",layout);
+//                GridLayout layout = menuGridForm.getGridLayout(menuTree);
+//                Window window = new Window("新增下级",layout);
+                Window window = new Window("新增下级",menuGridForm.getGridLayout(menuTree));
                 window.setResizable(false);
+                window.setModal(true);
                 window.center();
 
                 addWindow(window);
@@ -335,19 +342,24 @@ public class MyUI extends UI {
                 System.out.println("++++++++++++++++++++++++++++++++++++");
             }
         });
-        menuBar.addItem("删除",VaadinIcons.DEL_A,new MenuBar.Command() {
-            @Override
-            public void menuSelected(MenuBar.MenuItem menuItem) {
-                Set<MenuTree> menuTreeSet = grid.getSelectedItems();
-                if(menuTreeSet.size() != 1){
-                    Notification notification = new Notification("请选中一条数据删除", Notification.Type.ERROR_MESSAGE);
-                    notification.setPosition(Position.MIDDLE_CENTER);
-                    notification.show(Page.getCurrent());
-                    return;
-                }
-                MenuTree menuTree = grid.getSelectedItems().iterator().next();
+
+        MenuBar.Command cmdDelete = selectItem -> {
+            Set<MenuTree> menuTreeSet = grid.getSelectedItems();
+            if(menuTreeSet.size() < 1){
+                WindowCustom windowNotification = new WindowCustom(this,"notification","请选中一条数据删除");
+                windowNotification.center();
+                addWindow(windowNotification);
+                return;
             }
-        });
+            WindowCustom windowConfirm = new WindowCustom(this,"confirm","确定要删除吗");
+            windowConfirm.getButtonYes().addClickListener(clickEvent -> {
+               deleteMenuTree(new ArrayList(grid.getSelectedItems()));
+                removeWindow(windowConfirm);
+            });
+            windowConfirm.center();
+            addWindow(windowConfirm);
+        };
+        menuBar.addItem("删除",VaadinIcons.DEL_A,cmdDelete);
         MenuBar.MenuItem test = menuBar.addItem("");
         menuBar.setWidth(grid.getWidth() + "");
 
@@ -405,6 +417,51 @@ public class MyUI extends UI {
     public static class MyUIServlet extends VaadinServlet {
     }
 
+    public void deleteMenuTree(List<MenuTree> menuTreeList){
+        List<MenuTree> treeList = removeChildren(menuList,menuTreeList);
+        allItem.clear();
+        getAllItem(allItem,treeList);
+//        for(int i = 0 ; i < allItem.size();i++){
+//            MenuTree menuTree = allItem.get(i);
+//            for(int j = 0 ; j < menuTreeList.size();j++){
+//                if(menuTree.getId().equals(menuTreeList.get(j).getId())   || menuTree.getId().contains(menuTreeList.get(j).getId()) ){
+//                    allItem.remove(i);
+//                    i = -1;
+//                    break;
+//                }
+//            }
+//        }
+        //设置树的数据集
+        TreeDataProvider<String> dataProviderPro = (TreeDataProvider<String>) tree.getDataProvider();
+        TreeData<String> dataPro = dataProviderPro.getTreeData();
+        dataPro.clear();
+        recursionSetData(dataPro,null,menuList);
+        tree.setTreeData(dataPro);
+
+        MenuTreeContentLayout menuTreeContentLayout = new MenuTreeContentLayout(allItem);
+        grid.setGridDataSource(menuTreeContentLayout);
+        menuTreeContentLayout.refreshGridData(grid,menuTreeContentLayout.getTotalCount(grid),grid.getCurrentPageNumber(),grid.getNumberPerPage());
+        grid.refreshGrid();
+    }
+
+    private List<MenuTree> removeChildren(List<MenuTree> menuTree,List<MenuTree> removeMenu){
+        for(int i = 0 ; i < menuTree.size();i++){
+            for(int j = 0 ; j < removeMenu.size();j++) {
+                if(menuTree.get(i).getMenuName().equals(removeMenu.get(j).getMenuName())){
+                    menuTree.remove(i);
+                    i = -1;
+                    break;
+                }
+                if(menuTree.get(i).hasChildren()){
+                    removeChildren(menuTree.get(i).getChildrenList(),removeMenu);
+                }
+            }
+
+        }
+
+        return menuTree;
+    }
+
     //人工生成一组随即数据
     public List<MenuTree> getMenuTree(){
         List<MenuTree> menuList = new ArrayList<>();
@@ -427,7 +484,7 @@ public class MyUI extends UI {
             MenuTree parent = menuList.get(i);
             List<MenuTree> children = new ArrayList<>();
             for(int j = 1 ; j <= 3;j++){
-                children.add(new MenuTree("menu010" + j,parent.getMenuName().substring(0,2) + "子菜单" + j,2,"2018-06-13",j,menuList.get(i)));
+                children.add(new MenuTree(parent.getId() + "0" +j,parent.getMenuName().substring(0,2) + "子菜单" + j,2,"2018-06-13",j,menuList.get(i)));
             }
             Collections.sort(children, new Comparator<MenuTree>() {
                 @Override

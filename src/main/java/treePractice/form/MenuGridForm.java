@@ -10,6 +10,7 @@ import com.vaadin.ui.themes.ValoTheme;
 import treePractice.MyUI;
 import treePractice.entity.MenuTree;
 
+import javax.swing.text.Style;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -29,48 +30,83 @@ public class MenuGridForm {
      TextField textFieldParent = new TextField();
      Button buttonSave = new Button("保存");
      Button buttonCencel = new Button("取消");
+    VerticalLayout verticalLayout = new VerticalLayout();
+    VerticalLayout verticalLayoutButton = new VerticalLayout();
+    VerticalLayout layout =  new VerticalLayout();
 
 
 
 
-    public GridLayout getGridLayout(MenuTree menuTree){
-        GridLayout layout = new GridLayout(8,15);
-        layout.setMargin(true);
-        layout.setWidth("900px");
+    public VerticalLayout getGridLayout(MenuTree menuTree){
+//        HorizontalLayout horizontalLayout1 = new HorizontalLayout();
+//        horizontalLayout1.addComponents(labelId,labelName,labelLevel,labelCreateTime);
+        HorizontalLayout horizontalLayout1 = new HorizontalLayout();
+        textFieldId.setCaption("菜单id");
+        textFieldName.setCaption("菜单名字");
+        textFieldLevel.setCaption("菜单级别");
+        textFieldCreateTime.setCaption("创建时间");
+        horizontalLayout1.addComponents(textFieldId,textFieldName,textFieldLevel,textFieldCreateTime);
+        HorizontalLayout horizontalLayout2 = new HorizontalLayout();
+        textFieldOrder.setCaption("菜单顺序");
+        textFieldParent.setCaption("上级菜单");
+        horizontalLayout2.addComponents(textFieldOrder,textFieldParent);
 
-        labelId.setHeight("30px");
-        layout.addComponent(labelId,0,0,1,0);
-        layout.addComponent(textFieldId,0,1,1,1);
+        HorizontalLayout horizontalLayout3 = new HorizontalLayout();
+        buttonSave.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        buttonCencel.setClickShortcut(KeyCode.ESCAPE);
+        buttonSave.setClickShortcut(KeyCode.ENTER);
+        horizontalLayout3.addComponents(buttonSave,buttonCencel);
 
-        labelName.setHeight("30px");
-        layout.addComponent(labelName,2,0,3,0);
-        layout.addComponent(textFieldName,2,1,3,1);
-
-        labelLevel.setHeight("30px");
-        layout.addComponent(labelLevel,4,0,5,0);
-        layout.addComponent(textFieldLevel,4,1,5,1);
-
-        labelCreateTime.setHeight("30px");
-        layout.addComponent(labelCreateTime,6,0,7,0);
-        layout.addComponent(textFieldCreateTime,6,1,7,1);
-
-        labelOrder.setHeight("30px");
-        layout.addComponent(labelOrder,0,2,1,2);
-        layout.addComponent(textFieldOrder,0,3,1,3);
-
-        labelParent.setHeight("30px");
-        layout.addComponent(labelParent,2,2,3,2);
-        layout.addComponent(textFieldParent,2,3,3,3);
-
-        Label labelSpaceSave = new Label("");
-        labelSpaceSave.setHeight("40px");
-        layout.addComponent(labelSpaceSave,0,4,0,4);
-        layout.addComponent(buttonSave,0,5,0,5);
-
-        Label labelSpaceCencel = new Label("");
-        labelSpaceCencel.setHeight("40px");
-        layout.addComponent(labelSpaceCencel,1,4,1,4);
-        layout.addComponent(buttonCencel,1,5,1,5);
+//        GridLayout layout = new GridLayout(8,15);
+//        GridLayout layoutButton = new GridLayout(8,1);
+//
+//        layout.setMargin(true);
+//        layout.setWidth("900px");
+//
+//        labelId.setHeight("30px");
+//        layout.addComponent(labelId,0,0,1,0);
+//        layout.addComponent(textFieldId,0,1,1,1);
+//
+//        labelName.setHeight("30px");
+//        layout.addComponent(labelName,2,0,3,0);
+//        layout.addComponent(textFieldName,2,1,3,1);
+//
+//        labelLevel.setHeight("30px");
+//        layout.addComponent(labelLevel,4,0,5,0);
+//        layout.addComponent(textFieldLevel,4,1,5,1);
+//
+//        labelCreateTime.setHeight("30px");
+//        layout.addComponent(labelCreateTime,6,0,7,0);
+//        layout.addComponent(textFieldCreateTime,6,1,7,1);
+//
+//        labelOrder.setHeight("30px");
+//        layout.addComponent(labelOrder,0,2,1,2);
+//        layout.addComponent(textFieldOrder,0,3,1,3);
+//
+//        labelParent.setHeight("30px");
+//        layout.addComponent(labelParent,2,2,3,2);
+//        layout.addComponent(textFieldParent,2,3,3,3);
+//
+////        Label labelSpaceSave = new Label("");
+////        labelSpaceSave.setHeight("40");
+//////        labelSpaceSave.setWidth("800px");
+////        layoutButton.addComponent(labelSpaceSave,4,0,5,0);
+//////        buttonSave.addStyleName();
+////        layoutButton.addComponent(buttonSave,6,0,7,0);
+//
+////        Label labelSpaceCencel = new Label("");
+////        labelSpaceCencel.setHeight("40px");
+////        layout.addComponent(labelSpaceCencel,1,0,1,0);
+////        layout.addComponent(buttonCencel,1,0,1,0);
+        verticalLayout.addComponents(horizontalLayout1,horizontalLayout2);
+//        verticalLayout.setHeight("200px");
+        verticalLayoutButton.addComponents(horizontalLayout3);
+        verticalLayoutButton.setComponentAlignment(horizontalLayout3,Alignment.BOTTOM_RIGHT);
+        verticalLayoutButton.setMargin(false);
+        verticalLayoutButton.addStyleName("wumingkai");
+//        verticalLayout.setHeight("100px");
+        layout.addComponents(verticalLayout,verticalLayoutButton);
+//        verticalLayout.setHeight("150px");
         return layout;
     }
 
