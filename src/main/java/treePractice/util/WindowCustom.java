@@ -3,6 +3,7 @@ package treePractice.util;
 import com.vaadin.ui.*;
 import com.vaadin.ui.themes.ValoTheme;
 import treePractice.MyUI;
+import treePractice.entity.WindowType;
 
 /**
  * Created by wumk124866 on 2018/6/15.
@@ -13,31 +14,28 @@ public class WindowCustom extends Window {
     Button buttonNo = new Button();
     VerticalLayout verticalLayout = new VerticalLayout();
     //通知消息窗口
-    final static String WINDOW_NOTIFICATION = "notification";
+     final static String WINDOW_NOTIFICATION = "notification";
     //确认窗口
     final static String WINDOW_CONFIRM = "confirm";
-    static boolean selectResult = false;
 
-    public  WindowCustom(MyUI myUI ,String op,String message) {
+    public  WindowCustom(MyUI myUI , WindowType op, String message) {
         this.setWidth("320px");
         this.setHeight("180px");
         label.setValue(message);
         label.setHeight("50px");
         verticalLayout.addComponents(label);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        if(op.equals(WINDOW_CONFIRM)){
+        if(op.getWindowType().equals(WINDOW_CONFIRM)){
             buttonNo.setCaption("取消");
             buttonYes.addStyleName(ValoTheme.BUTTON_SMALL);
             buttonNo.addStyleName(ValoTheme.BUTTON_SMALL);
-//        buttonNo.addStyleName(ValoTheme.BUTTON_FRIENDLY);
-//        buttonYes.addStyleName(ValoTheme.BUTTON_DANGER);
             horizontalLayout.addComponents(buttonYes);
             horizontalLayout.addComponents(buttonNo);
             horizontalLayout.setSizeFull();
             horizontalLayout.setComponentAlignment(buttonYes,Alignment.BOTTOM_CENTER);
             horizontalLayout.setComponentAlignment(buttonNo,Alignment.BOTTOM_CENTER);
             verticalLayout.addComponents(horizontalLayout);
-        }else if(op.equals(WINDOW_NOTIFICATION)){
+        }else if(op.getWindowType().equals(WINDOW_NOTIFICATION)){
             buttonNo.setCaption("确认");
             verticalLayout.addComponents(buttonNo);
             verticalLayout.setComponentAlignment(buttonNo,Alignment.BOTTOM_CENTER);
@@ -54,7 +52,6 @@ public class WindowCustom extends Window {
 //            myUI.removeWindow(this);
 //        });
         buttonNo.addClickListener(clickEvent -> {
-            selectResult = false;
             myUI.removeWindow(this);
         });
     }

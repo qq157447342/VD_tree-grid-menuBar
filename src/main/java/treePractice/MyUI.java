@@ -26,6 +26,7 @@ import com.vaadin.ui.renderers.NumberRenderer;
 import sun.reflect.generics.tree.*;
 import treePractice.entity.MenuTree;
 import treePractice.entity.TestObject;
+import treePractice.entity.WindowType;
 import treePractice.form.MenuGridForm;
 import treePractice.util.DemoContentLayout;
 import treePractice.util.MenuTreeContentLayout;
@@ -80,14 +81,15 @@ public class MyUI extends UI {
         grid.addColumn(MenuTree::getId).setId("id");
         grid.addColumn(MenuTree::getLevel).setId("level");
         grid.addColumn(MenuTree::getCreateTime).setId("createTime");
+        grid.addColumn(MenuTree::getOrder).setId("order");
         grid.setHeightByRows(10);
-        grid.setColumns("id","menuName","level","createTime");
-        grid.setColumnOrder("id","menuName","level","createTime");
+        grid.setColumns("id","menuName","level","createTime","order");
+        grid.setColumnOrder("id","menuName","level","createTime","order");
         grid.getColumn("id").setCaption("菜单id");
         grid.getColumn("menuName").setCaption("菜单名称");
         grid.getColumn("level").setCaption("菜单级别");
         grid.getColumn("createTime").setCaption("创建日期");
-//        grid.getColumn("parentMenu").setCaption("父菜单");
+        grid.getColumn("order").setCaption("菜单顺序");
 
         grid.setWidth("1300");
         MenuTree[]  allMenuTrees= new MenuTree[allItem.size()];
@@ -207,151 +209,228 @@ public class MyUI extends UI {
                 });
             }
         });
-        menuBar.addItem("新增下级",VaadinIcons.EDIT,new MenuBar.Command() {
-            @Override
-            public void menuSelected(MenuBar.MenuItem menuItem) {
-                Set<MenuTree> menuTreeSet = grid.getSelectedItems();
-                if(menuTreeSet.size() != 1){
-                    Notification notification = new Notification("请选中一条数据新增", Notification.Type.ERROR_MESSAGE);
+        MenuBar.Command addChild = selectItem -> {
+            Set<MenuTree> menuTreeSet = grid.getSelectedItems();
+            if(menuTreeSet.size() != 1){
+                WindowCustom windowCustom = new WindowCustom(this,WindowType.WINDOW_NOTIFICATION,"请选中一条数据新增下级");
+                addWindow(windowCustom);
+                return;
+            }
+            MenuTree menuTree = grid.getSelectedItems().iterator().next();
+
+            MenuGridForm menuGridForm = new MenuGridForm();
+            //设置菜单id默认值，自动生成，无法更改
+            String lastMenuId = menuTree.getId();
+
+            String newMenuId = (menuTree.getChildrenList().size() + 1) < 10 ?lastMenuId + 0 + (menuTree.getChildrenList().size() + 1) :lastMenuId + (menuTree.getChildrenList().size() + 1);
+            menuGridForm.getTextFieldId().setValue(newMenuId);
+            menuGridForm.getTextFieldId().setReadOnly(true);
+            //上级菜单被选中菜单，无法更改
+            menuGridForm.getTextFieldParent().setValue(menuTree.getMenuName());
+            menuGridForm.getTextFieldParent().setReadOnly(true);
+            //菜单级别为选中菜单级别+1，无法更改
+            menuGridForm.getTextFieldLevel().setValue((menuTree.getLevel() + 1) + "");
+            menuGridForm.getTextFieldLevel().setReadOnly(true);
+            //菜单创建时间默认为当天日期，自动生成无法更改
+            Date dt=new Date();
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+            menuGridForm.getTextFieldCreateTime().setValue(sdf.format(dt));
+            menuGridForm.getTextFieldCreateTime().setReadOnly(true);
+
+//                GridLayout layout = menuGridForm.getGridLayout(menuTree);
+//                Window window = new Window("新增下级",layout);
+            Window window = new Window("新增下级",menuGridForm.getGridLayout(menuTree));
+            window.setResizable(false);
+            window.setModal(true);
+            window.center();
+
+            addWindow(window);
+
+            menuGridForm.getButtonSave().addClickListener(clickEvent -> {
+                String menuId = menuGridForm.getTextFieldId().getValue();
+                String menuName = menuGridForm.getTextFieldName().getValue();
+                String menuLevel = menuGridForm.getTextFieldLevel().getValue();
+                String menuCreateTime = menuGridForm.getTextFieldCreateTime().getValue();
+                String menuOrder = menuGridForm.getTextFieldOrder().getValue();
+                String menuParent = menuGridForm.getTextFieldParent().getValue();
+
+                if(menuName == null || menuName.equals("") || menuName.length()==0){
+                    Notification notification = new Notification("【菜单名称】不能为空", Notification.Type.ERROR_MESSAGE);
                     notification.setPosition(Position.MIDDLE_CENTER);
                     notification.show(Page.getCurrent());
                     return;
                 }
-                MenuTree menuTree = grid.getSelectedItems().iterator().next();
-
-                MenuGridForm menuGridForm = new MenuGridForm();
-                //设置菜单id默认值，自动生成，无法更改
-                String lastMenuId = menuTree.getId();
-
-                String newMenuId = (menuTree.getChildrenList().size() + 1) < 10 ?lastMenuId + 0 + (menuTree.getChildrenList().size() + 1) :lastMenuId + (menuTree.getChildrenList().size() + 1);
-                menuGridForm.getTextFieldId().setValue(newMenuId);
-                menuGridForm.getTextFieldId().setReadOnly(true);
-                //上级菜单被选中菜单，无法更改
-                menuGridForm.getTextFieldParent().setValue(menuTree.getMenuName());
-                menuGridForm.getTextFieldParent().setReadOnly(true);
-                //菜单级别为选中菜单级别+1，无法更改
-                menuGridForm.getTextFieldLevel().setValue((menuTree.getLevel() + 1) + "");
-                menuGridForm.getTextFieldLevel().setReadOnly(true);
-                //菜单创建时间默认为当天日期，自动生成无法更改
-                Date dt=new Date();
-                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-                menuGridForm.getTextFieldCreateTime().setValue(sdf.format(dt));
-                menuGridForm.getTextFieldCreateTime().setReadOnly(true);
-
-//                GridLayout layout = menuGridForm.getGridLayout(menuTree);
-//                Window window = new Window("新增下级",layout);
-                Window window = new Window("新增下级",menuGridForm.getGridLayout(menuTree));
-                window.setResizable(false);
-                window.setModal(true);
-                window.center();
-
-                addWindow(window);
-
-                menuGridForm.getButtonSave().addClickListener(clickEvent -> {
-                    String menuId = menuGridForm.getTextFieldId().getValue();
-                    String menuName = menuGridForm.getTextFieldName().getValue();
-                    String menuLevel = menuGridForm.getTextFieldLevel().getValue();
-                    String menuCreateTime = menuGridForm.getTextFieldCreateTime().getValue();
-                    String menuOrder = menuGridForm.getTextFieldOrder().getValue();
-                    String menuParent = menuGridForm.getTextFieldParent().getValue();
-
-                    if(menuName == null || menuName.equals("") || menuName.length()==0){
-                        Notification notification = new Notification("【菜单名称】不能为空", Notification.Type.ERROR_MESSAGE);
+                for(int i = 0 ; i < allItem.size();i++){
+                    if(menuName.equals(allItem.get(i).getMenuName())){
+                        Notification notification = new Notification("菜单名称重复请重新输入", Notification.Type.ERROR_MESSAGE);
                         notification.setPosition(Position.MIDDLE_CENTER);
                         notification.show(Page.getCurrent());
                         return;
                     }
-                    for(int i = 0 ; i < allItem.size();i++){
-                        if(menuName.equals(allItem.get(i).getMenuName())){
-                            Notification notification = new Notification("菜单名称重复请重新输入", Notification.Type.ERROR_MESSAGE);
-                            notification.setPosition(Position.MIDDLE_CENTER);
-                            notification.show(Page.getCurrent());
-                            return;
+                }
+
+                String positiveIntegerRegular = "^[0-9]*[1-9][0-9]*$";
+                if(!menuOrder.matches(positiveIntegerRegular)){
+                    Notification notification = new Notification("【菜单顺序】只能输入正整数", Notification.Type.ERROR_MESSAGE);
+                    notification.setPosition(Position.MIDDLE_CENTER);
+                    notification.show(Page.getCurrent());
+                    return;
+                };
+                MenuTree addMenu = new MenuTree();
+                addMenu.setId(menuId);
+                addMenu.setOrder(Integer.valueOf(menuOrder));
+                addMenu.setMenuName(menuName);
+                addMenu.setParentMenu(null);
+                addMenu.setCreateTime(menuCreateTime);
+                addMenu.setLevel(Integer.valueOf(menuLevel));
+
+                if(menuTree.hasChildren()){
+                    menuTree.getChildrenList().add(addMenu);
+                }else{
+                    List<MenuTree> children = new ArrayList<>();
+                    children.add(addMenu);
+                    menuTree.setChildrenList(children);
+                }
+
+                menuList = addChild(menuList,addMenu);
+
+                Collections.sort(menuList, new Comparator<MenuTree>() {
+                    @Override
+                    public int compare(MenuTree o1, MenuTree o2) {
+                        if(o1.getOrder() >= o2.getOrder()) {
+                            return 1;
+                        }
+                        else {
+                            return -1;
                         }
                     }
-
-                    String positiveIntegerRegular = "^[0-9]*[1-9][0-9]*$";
-                    if(!menuOrder.matches(positiveIntegerRegular)){
-                        Notification notification = new Notification("【菜单顺序】只能输入正整数", Notification.Type.ERROR_MESSAGE);
-                        notification.setPosition(Position.MIDDLE_CENTER);
-                        notification.show(Page.getCurrent());
-                        return;
-                    };
-                    MenuTree addMenu = new MenuTree();
-                    addMenu.setId(menuId);
-                    addMenu.setOrder(Integer.valueOf(menuOrder));
-                    addMenu.setMenuName(menuName);
-                    addMenu.setParentMenu(null);
-                    addMenu.setCreateTime(menuCreateTime);
-                    addMenu.setLevel(Integer.valueOf(menuLevel));
-
-                    if(menuTree.hasChildren()){
-                        menuTree.getChildrenList().add(addMenu);
-                    }else{
-                        List<MenuTree> children = new ArrayList<>();
-                        children.add(addMenu);
-                        menuTree.setChildrenList(children);
+                });
+                dataPro.clear();
+                recursionSetData(dataPro,null,menuList);
+                tree.setTreeData(dataPro);
+                allItem.add(addMenu);
+                Collections.sort(allItem, new Comparator<MenuTree>() {
+                    @Override
+                    public int compare(MenuTree o1, MenuTree o2) {
+                        return o1.getId().compareTo(o1.getId());
                     }
-
-                    menuList = addChild(menuList,addMenu);
-
-                    Collections.sort(menuList, new Comparator<MenuTree>() {
-                        @Override
-                        public int compare(MenuTree o1, MenuTree o2) {
-                            if(o1.getOrder() >= o2.getOrder()) {
-                                return 1;
-                            }
-                            else {
-                                return -1;
-                            }
-                        }
-                    });
-                    dataPro.clear();
-                    recursionSetData(dataPro,null,menuList);
-                    tree.setTreeData(dataPro);
-                    allItem.add(addMenu);
-                    Collections.sort(allItem, new Comparator<MenuTree>() {
-                        @Override
-                        public int compare(MenuTree o1, MenuTree o2) {
-                            return o1.getMenuName().compareTo(o1.getMenuName());
-                        }
-                    });
-                    MenuTreeContentLayout menuTreeContentLayout = new MenuTreeContentLayout(allItem);
-                    grid.setGridDataSource(menuTreeContentLayout);
-                    menuTreeContentLayout.refreshGridData(grid,menuTreeContentLayout.getTotalCount(grid),grid.getCurrentPageNumber(),grid.getNumberPerPage());
-                    grid.refreshGrid();
+                });
+                grid.setGridDataSource(new MenuTreeContentLayout(allItem));
+                menuTreeContentLayout.refreshGridData(grid,menuTreeContentLayout.getTotalCount(grid),grid.getCurrentPageNumber(),grid.getNumberPerPage());
+                grid.refreshGrid();
 //                    grid.setItems(allItem.toArray(new MenuTree[allItem.size()]));
-                    removeWindow(window);
-                });
-                menuGridForm.getButtonCencel().addClickListener(clickEvent -> {
-                    removeWindow(window);
-                });
+                removeWindow(window);
+            });
+            menuGridForm.getButtonCencel().addClickListener(clickEvent -> {
+                removeWindow(window);
+            });
 
 
+        };
+        menuBar.addItem("新增下级",VaadinIcons.EDIT, addChild);
+        //菜单按钮中编辑按钮
+        MenuBar.Command edit = selectItem ->{
+            Set<MenuTree> menuTreeSet = grid.getSelectedItems();
+            if(menuTreeSet.size() != 1){
+                WindowCustom windowCustom = new WindowCustom(this, WindowType.WINDOW_NOTIFICATION,"请选中一条数据编辑");
+                addWindow(windowCustom);
+                return;
             }
-        });
-        menuBar.addItem("编辑",VaadinIcons.ADJUST,new MenuBar.Command() {
-            @Override
-            public void menuSelected(MenuBar.MenuItem menuItem) {
-//                GridLayout layout = new MenuGridForm().getGridLayout();
+            MenuTree menuTree = grid.getSelectedItems().iterator().next();
+            MenuGridForm menuGridForm = new MenuGridForm();
+            //设置菜单id默认值，自动生成，无法更改
+            menuGridForm.getTextFieldId().setValue(menuTree.getId());
+            menuGridForm.getTextFieldId().setReadOnly(true);
+            //上级菜单被选中菜单的父菜单，无法更改
+            menuGridForm.getTextFieldParent().setValue(menuTree.getParentMenu() == null ?  "" :menuTree.getParentMenu().getMenuName());
+            menuGridForm.getTextFieldParent().setReadOnly(true);
+            //菜单级别为选中菜单级别+1，无法更改
+            menuGridForm.getTextFieldLevel().setValue((menuTree.getLevel()) + "");
+            menuGridForm.getTextFieldLevel().setReadOnly(true);
+            //菜单创建时间默认为当天日期，自动生成无法更改
+            menuGridForm.getTextFieldCreateTime().setValue(menuTree.getCreateTime());
+            menuGridForm.getTextFieldCreateTime().setReadOnly(true);
+            //菜单名字为被选中菜单名字，可以更改
+            menuGridForm.getTextFieldName().setValue(menuTree.getMenuName());
+            //菜单顺序为被选中菜单顺序，可以更改
+            menuGridForm.getTextFieldOrder().setValue(menuTree.getOrder() + "");
 
-//                Window window = new Window("测试",layout);
-//
-//                window.center();
-//                addWindow(window);
-                System.out.println("++++++++++++++++++++++++++++++++++++");
-            }
-        });
+            Window window = new Window("编辑",menuGridForm.getGridLayout(menuTree));
+            window.setResizable(false);
+            window.setModal(true);
+            window.center();
+            addWindow(window);
+            menuGridForm.getButtonSave().addClickListener(clickEvent -> {
+                String menuId = menuGridForm.getTextFieldId().getValue();
+                String menuName = menuGridForm.getTextFieldName().getValue();
+                String menuLevel = menuGridForm.getTextFieldLevel().getValue();
+                String menuCreateTime = menuGridForm.getTextFieldCreateTime().getValue();
+                String menuOrder = menuGridForm.getTextFieldOrder().getValue();
+                String menuParent = menuGridForm.getTextFieldParent().getValue();
+
+                for(int i = 0 ; i < allItem.size();i++){
+                    if(menuName.equals(allItem.get(i).getMenuName()) &&  !menuId.equals(allItem.get(i).getId())){
+                        WindowCustom windowCustom = new WindowCustom(this,WindowType.WINDOW_NOTIFICATION,"【菜单名称】重复请重新输入");
+                        addWindow(windowCustom);
+                        return;
+                    }
+                }
+
+                String positiveIntegerRegular = "^[0-9]*[1-9][0-9]*$";
+                if(!menuOrder.matches(positiveIntegerRegular)){
+                    WindowCustom windowCustom = new WindowCustom(this,WindowType.WINDOW_NOTIFICATION,"【菜单顺序】只能输入正整数");
+                    addWindow(windowCustom);
+                    return;
+                };
+
+                MenuTree addMenu = findMenuTreeById(menuList,menuId);
+                addMenu.setOrder(Integer.valueOf(menuOrder));
+                addMenu.setMenuName(menuName);
+
+
+
+                Collections.sort(menuList, new Comparator<MenuTree>() {
+                    @Override
+                    public int compare(MenuTree o1, MenuTree o2) {
+                        if(o1.getOrder() >= o2.getOrder()) {
+                            return 1;
+                        }
+                        else {
+                            return -1;
+                        }
+                    }
+                });
+                dataPro.clear();
+                recursionSetData(dataPro,null,menuList);
+                tree.setTreeData(dataPro);
+                allItem.add(addMenu);
+                Collections.sort(allItem, new Comparator<MenuTree>() {
+                    @Override
+                    public int compare(MenuTree o1, MenuTree o2) {
+                        return o1.getId().compareTo(o1.getId());
+                    }
+                });
+                grid.setGridDataSource(new MenuTreeContentLayout(allItem));
+                menuTreeContentLayout.refreshGridData(grid,menuTreeContentLayout.getTotalCount(grid),grid.getCurrentPageNumber(),grid.getNumberPerPage());
+                grid.refreshGrid();
+//                    grid.setItems(allItem.toArray(new MenuTree[allItem.size()]));
+                removeWindow(window);
+            });
+            menuGridForm.getButtonCencel().addClickListener(clickEvent -> {
+                removeWindow(window);
+            });
+        };
+        menuBar.addItem("编辑",VaadinIcons.ADJUST,edit);
 
         MenuBar.Command cmdDelete = selectItem -> {
             Set<MenuTree> menuTreeSet = grid.getSelectedItems();
             if(menuTreeSet.size() < 1){
-                WindowCustom windowNotification = new WindowCustom(this,"notification","请选中一条数据删除");
+                WindowCustom windowNotification = new WindowCustom(this,WindowType.WINDOW_NOTIFICATION,"请选中一条数据删除");
                 windowNotification.center();
                 addWindow(windowNotification);
                 return;
             }
-            WindowCustom windowConfirm = new WindowCustom(this,"confirm","确定要删除吗");
+            WindowCustom windowConfirm = new WindowCustom(this,WindowType.WINDOW_CONFIRM,"确定要删除吗");
             windowConfirm.getButtonYes().addClickListener(clickEvent -> {
                deleteMenuTree(new ArrayList(grid.getSelectedItems()));
                 removeWindow(windowConfirm);
@@ -416,6 +495,19 @@ public class MyUI extends UI {
     @VaadinServletConfiguration(ui = MyUI.class, productionMode = false)
     public static class MyUIServlet extends VaadinServlet {
     }
+
+    public MenuTree findMenuTreeById(List<MenuTree> menuList,String menuId){
+        List<MenuTree> allList = new ArrayList<>();
+        getAllItem(allList,menuList);
+//        allList.get(0).setId("cecece");
+        for(int i = 0 ; i < allList.size();i++){
+            if(allList.get(i).getId().equals(menuId)){
+                return allList.get(i);
+            }
+        }
+        return null;
+    };
+
 
     public void deleteMenuTree(List<MenuTree> menuTreeList){
         List<MenuTree> treeList = removeChildren(menuList,menuTreeList);
@@ -517,6 +609,17 @@ public class MyUI extends UI {
 
     //根据树结构数据 给treeData赋值
     public TreeData recursionSetData(TreeData treeData, MenuTree parent, List<MenuTree> list) {
+        Collections.sort(list, new Comparator<MenuTree>() {
+            @Override
+            public int compare(MenuTree o1, MenuTree o2) {
+                if(o1.getOrder() >= o2.getOrder()) {
+                    return 1;
+                }
+                else {
+                    return -1;
+                }
+            }
+        });
         for (int i = 0; i < list.size(); i++) {
             MenuTree menu = list.get(i);
             if(parent == null){

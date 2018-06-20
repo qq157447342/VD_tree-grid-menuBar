@@ -66,38 +66,6 @@ public class MenuGridForm {
 //        labelId.setHeight("30px");
 //        layout.addComponent(labelId,0,0,1,0);
 //        layout.addComponent(textFieldId,0,1,1,1);
-//
-//        labelName.setHeight("30px");
-//        layout.addComponent(labelName,2,0,3,0);
-//        layout.addComponent(textFieldName,2,1,3,1);
-//
-//        labelLevel.setHeight("30px");
-//        layout.addComponent(labelLevel,4,0,5,0);
-//        layout.addComponent(textFieldLevel,4,1,5,1);
-//
-//        labelCreateTime.setHeight("30px");
-//        layout.addComponent(labelCreateTime,6,0,7,0);
-//        layout.addComponent(textFieldCreateTime,6,1,7,1);
-//
-//        labelOrder.setHeight("30px");
-//        layout.addComponent(labelOrder,0,2,1,2);
-//        layout.addComponent(textFieldOrder,0,3,1,3);
-//
-//        labelParent.setHeight("30px");
-//        layout.addComponent(labelParent,2,2,3,2);
-//        layout.addComponent(textFieldParent,2,3,3,3);
-//
-////        Label labelSpaceSave = new Label("");
-////        labelSpaceSave.setHeight("40");
-//////        labelSpaceSave.setWidth("800px");
-////        layoutButton.addComponent(labelSpaceSave,4,0,5,0);
-//////        buttonSave.addStyleName();
-////        layoutButton.addComponent(buttonSave,6,0,7,0);
-//
-////        Label labelSpaceCencel = new Label("");
-////        labelSpaceCencel.setHeight("40px");
-////        layout.addComponent(labelSpaceCencel,1,0,1,0);
-////        layout.addComponent(buttonCencel,1,0,1,0);
         verticalLayout.addComponents(horizontalLayout1,horizontalLayout2);
 //        verticalLayout.setHeight("200px");
         verticalLayoutButton.addComponents(horizontalLayout3);
