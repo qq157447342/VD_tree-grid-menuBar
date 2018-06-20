@@ -7220,7 +7220,11 @@ div.v-layout.v-horizontal.v-widget {
     bottom: 0;
     left: 0;
     border-radius: inherit;
-    background-color: #00eeff;
+    background: -webkit-linear-gradient(left top,#ffeeaa, #cceeff);
+    background: -o-linear-gradient(bottom right,#ffeeaa, #cceeff);
+    background: -moz-linear-gradient(bottom right,#ffeeaa, #cceeff);
+    background: linear-gradient(to bottom right,#ffeeaa, #cceeff);
+    /*background-color: #00eeff;*/
     -webkit-transition: box-shadow 180ms, border 180ms;
     -moz-transition: box-shadow 180ms, border 180ms;
     transition: box-shadow 180ms, border 180ms;
@@ -8529,7 +8533,11 @@ div.v-layout.v-horizontal.v-widget {
     text-overflow: ellipsis;
     white-space: nowrap;
     color: #7e7e7e;
-    background-color: #eeffff;
+    background: -webkit-linear-gradient(left,#eeffff , #ffffff);
+    background: -o-linear-gradient(right,#eeffff , #ffffff);
+    background: -moz-linear-gradient(right,#eeffff , #ffffff);
+    background: linear-gradient(right,#eeffff , #ffffff);
+    /*background-color: #eeffff;*/
 }
 
 .mytheme .v-window-restorebox-disabled  ~ .v-window-closebox ~ .v-window-header, .mytheme .v-window-maximizebox-disabled  ~ .v-window-closebox ~ .v-window-header {
